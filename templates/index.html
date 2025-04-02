@@ -94,7 +94,7 @@
                 document.getElementById("slowInternet").classList.remove("hidden");
             }, 20000); // Show message after 20 seconds
 
-            fetch("https://linkhai-production.up.railway.app/api/download", {  // Change this if running on another device
+            fetch("http://127.0.0.1:5000/download", {  // Change this if running on another device
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ url: url, type: type, resolution: resolution })
