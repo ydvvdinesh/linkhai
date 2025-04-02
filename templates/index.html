@@ -5,31 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Downloader</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+    <style>
+        /* High-intensity Gradient */
+        body {
+            background: linear-gradient(to right, #0000FF, #FF1493); /* Bright Blue to Deep Pink */
+        }
 
-    <div class="bg-gray-800 shadow-lg rounded-lg p-8 max-w-lg w-full text-center">
-        <h2 class="text-3xl font-bold text-red-500 mb-4">YouTube Downloader</h2>
+        /* Signature Style */
+        .signature {
+            position: fixed;
+            bottom: 10px;
+            right: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.7); /* Slightly transparent white */
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body class="text-white flex items-center justify-center min-h-screen">
+
+    <div class="bg-gray-900 shadow-xl rounded-lg p-8 max-w-lg w-full text-center">
+        <h2 class="text-3xl font-extrabold text-red-500 mb-4">Link Hai</h2>
         <p class="text-gray-300 mb-6">Download YouTube videos and audio quickly and easily!</p>
 
         <input id="url" type="text" class="w-full p-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-red-500 outline-none" 
             placeholder="Enter YouTube URL" required>
 
         <div class="mt-6 space-y-3">
-            <button onclick="downloadFile('video')" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg">
+            <button onclick="downloadFile('video')" class="w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-all">
                 Download Video 🎥
             </button>
-            <button onclick="downloadFile('audio')" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg">
+            <button onclick="downloadFile('audio')" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-all">
                 Download Audio 🎵
             </button>
         </div>
 
-        <p id="loading" class="text-yellow-400 mt-4 hidden">Downloading... Please wait ⏳</p>
+        <!-- Progress Bar -->
+        <p id="loading" class="text-yellow-400 mt-4 hidden">Downloading... Please wait ⏳ <span id="progressText">0%</span></p>
+        <p id="slowInternet" class="text-orange-500 mt-2 hidden">⚠️ You have slow internet, please wait...</p>
+        <div id="progressContainer" class="w-full bg-gray-700 rounded-lg mt-2 hidden">
+            <div id="progressBar" class="h-2 bg-green-500 rounded-lg" style="width: 0%;"></div>
+        </div>
+
         <p id="message" class="mt-4 font-semibold"></p>
     </div>
 
+    <!-- Signature -->
+    <p class="signature">Created By Dinesh Yadav(Marwadi University)
+    </p>
+
     <script>
-       function downloadFile(type) {
+        function downloadFile(type) {
             let url = document.getElementById("url").value;
             if (!url) {
                 alert("⚠️ Please enter a YouTube URL!");
@@ -41,8 +68,31 @@
                 resolution = prompt("Enter resolution (1080, 720, 480, etc. or 'best')", "best");
             }
 
+            // Show progress bar
             document.getElementById("loading").classList.remove("hidden");
+            document.getElementById("progressContainer").classList.remove("hidden");
             document.getElementById("message").innerText = "";
+            document.getElementById("slowInternet").classList.add("hidden"); // Hide slow internet message initially
+
+            let progress = 0;
+            let progressBar = document.getElementById("progressBar");
+            let progressText = document.getElementById("progressText");
+
+            let fakeProgress = setInterval(() => {
+                if (progress >= 100) {
+                    clearInterval(fakeProgress);
+                } else {
+                    progress += Math.floor(Math.random() * 10) + 5; // Random increments of 5-15%
+                    if (progress > 100) progress = 100;
+                    progressBar.style.width = progress + "%";
+                    progressText.innerText = `${progress}%`;
+                }
+            }, 500); // Update every 500ms
+
+            // Timeout warning for slow internet
+            let slowInternetWarning = setTimeout(() => {
+                document.getElementById("slowInternet").classList.remove("hidden");
+            }, 20000); // Show message after 20 seconds
 
             fetch("http://127.0.0.1:5000/download", {  // Change this if running on another device
                 method: "POST",
@@ -51,18 +101,32 @@
             })
             .then(response => response.json())
             .then(data => {
+                clearInterval(fakeProgress);
+                clearTimeout(slowInternetWarning); // Cancel slow internet warning if download is successful
                 document.getElementById("loading").classList.add("hidden");
+                document.getElementById("progressContainer").classList.add("hidden");
+                document.getElementById("slowInternet").classList.add("hidden");
+
                 if (data.error) {
                     document.getElementById("message").innerText = "❌ Error: " + data.error;
                     document.getElementById("message").classList.add("text-red-500");
                 } else {
                     document.getElementById("message").innerHTML = 
-                        `✅ <a href="http://127.0.0.1:5000/download-file?filename=${encodeURIComponent(data.filename)}" download>Click here</a> to download.`;
+                        `<a href="http://127.0.0.1:5000/download-file?filename=${encodeURIComponent(data.filename)}" 
+                            download 
+                            class="bg-green-500 text-white font-bold px-4 py-2 rounded-lg mt-4 inline-block shadow-lg 
+                                   hover:bg-green-700 transition-all">
+                            ⬇️ Click Here to Download
+                        </a>`;
                     document.getElementById("message").classList.add("text-green-500");
                 }
             })
             .catch(error => {
+                clearInterval(fakeProgress);
+                clearTimeout(slowInternetWarning);
                 document.getElementById("loading").classList.add("hidden");
+                document.getElementById("progressContainer").classList.add("hidden");
+                document.getElementById("slowInternet").classList.add("hidden");
                 document.getElementById("message").innerText = "❌ Error: " + error;
                 document.getElementById("message").classList.add("text-red-500");
             });
