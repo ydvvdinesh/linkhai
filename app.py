@@ -104,5 +104,5 @@ def download_file():
 
 if __name__ == '__main__':
     import os
-    port = int(os.environ.get("PORT", 10000))  # Automatically detect the port for Render
+    port = int(os.environ.get("PORT", 5000))  # Automatically detect the port for Render
     app.run(host='0.0.0.0', port=port, debug=True)

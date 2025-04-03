@@ -62,37 +62,39 @@
                 alert("⚠️ Please enter a YouTube URL!");
                 return;
             }
-    
+
             let resolution = "best";
             if (type === "video") {
                 resolution = prompt("Enter resolution (1080, 720, 480, etc. or 'best')", "best");
             }
-    
+
+            // Show progress bar
             document.getElementById("loading").classList.remove("hidden");
             document.getElementById("progressContainer").classList.remove("hidden");
             document.getElementById("message").innerText = "";
-            document.getElementById("slowInternet").classList.add("hidden");
-    
+            document.getElementById("slowInternet").classList.add("hidden"); // Hide slow internet message initially
+
             let progress = 0;
             let progressBar = document.getElementById("progressBar");
             let progressText = document.getElementById("progressText");
-    
+
             let fakeProgress = setInterval(() => {
                 if (progress >= 100) {
                     clearInterval(fakeProgress);
                 } else {
-                    progress += Math.floor(Math.random() * 10) + 5; 
+                    progress += Math.floor(Math.random() * 10) + 5; // Random increments of 5-15%
                     if (progress > 100) progress = 100;
                     progressBar.style.width = progress + "%";
                     progressText.innerText = `${progress}%`;
                 }
-            }, 500);
-    
+            }, 500); // Update every 500ms
+
+            // Timeout warning for slow internet
             let slowInternetWarning = setTimeout(() => {
                 document.getElementById("slowInternet").classList.remove("hidden");
-            }, 20000);
-    
-            fetch("https://linkhai.onrender.com/download", {  
+            }, 20000); // Show message after 20 seconds
+
+            fetch("http://127.0.0.1:5000/download", {  // Change this if running on another device
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ url: url, type: type, resolution: resolution })
@@ -100,17 +102,17 @@
             .then(response => response.json())
             .then(data => {
                 clearInterval(fakeProgress);
-                clearTimeout(slowInternetWarning);
+                clearTimeout(slowInternetWarning); // Cancel slow internet warning if download is successful
                 document.getElementById("loading").classList.add("hidden");
                 document.getElementById("progressContainer").classList.add("hidden");
                 document.getElementById("slowInternet").classList.add("hidden");
-    
+
                 if (data.error) {
                     document.getElementById("message").innerText = "❌ Error: " + data.error;
                     document.getElementById("message").classList.add("text-red-500");
                 } else {
                     document.getElementById("message").innerHTML = 
-                        `<a href="https://linkhai.onrender.com/download-file?filename=${encodeURIComponent(data.filename)}" 
+                        `<a href="http://127.0.0.1:5000/download-file?filename=${encodeURIComponent(data.filename)}" 
                             download 
                             class="bg-green-500 text-white font-bold px-4 py-2 rounded-lg mt-4 inline-block shadow-lg 
                                    hover:bg-green-700 transition-all">
@@ -130,4 +132,5 @@
             });
         }
     </script>
-    
+</body>
+</html>
