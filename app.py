@@ -2,8 +2,10 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 import yt_dlp
 import os
 import re
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # Setup the download directory
 DOWNLOAD_FOLDER = os.path.join(os.getcwd(), "downloads")
@@ -99,4 +101,6 @@ def download_file():
     return send_from_directory(DOWNLOAD_FOLDER, filename, as_attachment=True)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    import os
+    port = int(os.environ.get("PORT", 10000))  # Automatically detect the port for Render
+    app.run(host='0.0.0.0', port=port, debug=True)
