@@ -24,6 +24,7 @@ def download_video(url, resolution="best"):
         'outtmpl': os.path.join(DOWNLOAD_FOLDER, '%(title)s.%(ext)s'),
         'noplaylist': True,
         'merge_output_format': 'mp4',
+        'cookies-from-browser': 'chrome',  # Change to 'firefox' or 'edge' if needed
     }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -43,6 +44,7 @@ def download_audio(url):
         'outtmpl': os.path.join(DOWNLOAD_FOLDER, '%(title)s.%(ext)s'),
         'noplaylist': True,
         'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}],
+        'cookies-from-browser': 'chrome',  # Change to 'firefox' or 'edge' if needed
     }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
